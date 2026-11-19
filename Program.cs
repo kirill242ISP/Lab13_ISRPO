@@ -1,4 +1,5 @@
-﻿Probe.Run();
+﻿// Probe.Run();
+
 Hero yaroslav = new Hero("Ярослав", 100);
 Hero anastasia = new Hero("Анастасия", 90);
 Hero artem = new Hero("Артём", 120);
@@ -9,58 +10,50 @@ alexander.TakeDamage(10);
 alexander.Heal(10);
 
 Guild guild = new Guild("Гильдия героев");
-guild.Heroes.Add(yaroslav);
-guild.Heroes.Add(anastasia);
-guild.Heroes.Add(artem);
-guild.Heroes.Add(alexander);
-guild.Heroes.Add(sergey);
+guild.AddHero(yaroslav);
+guild.AddHero(anastasia);
+guild.AddHero(artem);
+guild.AddHero(alexander);
+guild.AddHero(sergey);
+
+List<Hero> members = guild.GetMembers();
 
 Console.WriteLine($">>> {guild.Name}: перекличка <<<");
-Console.WriteLine($"Участников: {guild.Heroes.Count}");
+Console.WriteLine($"Участников: {guild.MemberCount}");
 
-if (guild.Heroes.Count > 0) {
-    Console.WriteLine($"Первый: {guild.Heroes[0].Name}");
-    Console.WriteLine($"Последний: {guild.Heroes[guild.Heroes.Count - 1].Name}");
+if (members.Count > 0)
+{
+    Console.WriteLine($"Первый: {members[0].Name}");
+    Console.WriteLine($"Последний: {members[members.Count - 1].Name}");
 }
 
 Console.WriteLine();
-foreach (Hero hero in guild.Heroes) {
+foreach (Hero hero in members)
+{
     Console.WriteLine(hero.GetInfo());
     Console.WriteLine();
 }
 
-int strongCount = 0;
-foreach (Hero hero in guild.Heroes) {
-    if (hero.Health >= 120) {
-        strongCount += 1;
-    }
+Hero? found = guild.FindHeroByName(" аРтЁм ");
+if (found != null)
+{
+    Console.WriteLine($"Найден по запросу « аРтЁм »: {found.Name}");
 }
-Console.WriteLine($"Могут нести тяжёлые ящики (здоровье от 120): {strongCount}");
+else
+{
+    Console.WriteLine("По запросу « аРтЁм » никого нет.");
+}
 
-if (guild.Heroes.Count > 0) {
-    Hero strongest = guild.Heroes[0];
-    foreach (Hero hero in guild.Heroes) {
-        if (hero.Health > strongest.Health) {
-            strongest = hero;
-        }
-    }
+Console.WriteLine($"Повтор Александра принят: {guild.AddHero(alexander)}");
+Console.WriteLine($"Удалён отсутствующий: {guild.RemoveHero("Борис")}");
+Console.WriteLine($"Участников после проверок: {guild.MemberCount}");
+
+Console.WriteLine($"Могут нести тяжёлые ящики (здоровье от 120): {guild.CountHealthy(120)}");
+
+Hero? strongest = guild.FindStrongest();
+if (strongest != null)
+{
     Console.WriteLine($"Самый здоровый: {strongest.Name} ({strongest.Health})");
-}
-
-if (guild.Heroes.Count > 0) {
-    int totalHealth = 0;
-    foreach (Hero hero in guild.Heroes) {
-        totalHealth += hero.Health;
-    }
-    int averageHealth = totalHealth / guild.Heroes.Count;
-
-    int aboveAverageCount = 0;
-    foreach (Hero hero in guild.Heroes) {
-        if (hero.Health > averageHealth) {
-            aboveAverageCount += 1;
-        }
-    }
-    Console.WriteLine($"Среднее здоровье: {averageHealth}, здоровее среднего: {aboveAverageCount}");
 }
 
 Console.WriteLine();
@@ -69,39 +62,36 @@ Warehouse warehouse = new Warehouse("Оружейный склад гильди�
 Product shield = new Product("Железный щит", 800, 10);
 Product sword = new Product("Стальной меч", 1200, 2);
 Product potion = new Product("Зелье лечения", 150, 15);
-
-warehouse.Products.Add(shield);
-warehouse.Products.Add(sword);
-warehouse.Products.Add(potion);
+Product bow = new Product("Охотничий лук", 950, 1);
 
 Console.WriteLine($">>> {warehouse.Name} <<<");
+Console.WriteLine($"Приём «Железный щит»: {warehouse.AddProduct(shield)}");
+Console.WriteLine($"Приём «Стальной меч»: {warehouse.AddProduct(sword)}");
+Console.WriteLine($"Приём «Зелье лечения»: {warehouse.AddProduct(potion)}");
+Console.WriteLine($"Приём «Охотничий лук»: {warehouse.AddProduct(bow)}");
+Console.WriteLine($"Повтор «СТАЛЬНОЙ МЕЧ» принят: {warehouse.AddProduct(new Product("  СТАЛЬНОЙ МЕЧ ", 1200, 5))}");
+Console.WriteLine($"Позиций на складе: {warehouse.ProductCount}");
 
-Console.WriteLine($"Всего позиций: {warehouse.Products.Count}");
-if (warehouse.Products.Count > 0) {
-    Console.WriteLine($"Первый товар: {warehouse.Products[0].Name}");
-    Console.WriteLine($"Последний товар: {warehouse.Products[warehouse.Products.Count - 1].Name}");
+Product? foundProduct = warehouse.FindProductByName("  зелье лечения ");
+if (foundProduct != null)
+{
+    Console.WriteLine($"Найден товар: {foundProduct.Name} | Цена: {foundProduct.Price} | Остаток: {foundProduct.StockQuantity} шт.");
+}
+else
+{
+    Console.WriteLine("Товар не найден.");
 }
 
-Console.WriteLine();
-foreach (Product item in warehouse.Products) {
-    Console.WriteLine($"Товар: {item.Name} | Цена: {item.Price} | Остаток: {item.StockQuantity} шт.");
+Product? missingProduct = warehouse.FindProductByName("Волшебный посох");
+if (missingProduct != null)
+{
+    Console.WriteLine($"Найден товар: {missingProduct.Name}");
+}
+else
+{
+    Console.WriteLine("Запрос «Волшебный посох»: товар на складе отсутствует.");
 }
 
-Product bow = new Product("Охотничий лук", 950, 1);
-warehouse.Products.Add(bow);
-
-Console.WriteLine($"\nПосле поступления нового товара (всего позиций: {warehouse.Products.Count}):");
-foreach (Product item in warehouse.Products) {
-    Console.WriteLine($"Товар: {item.Name} | Цена: {item.Price} | Остаток: {item.StockQuantity} шт.");
-}
-
-int lowStockCount = 0;
-foreach (Product item in warehouse.Products) {
-    if (item.StockQuantity < 3) {
-        lowStockCount += 1;
-    }
-}
-Console.WriteLine($"\nТоваров с критическим остатком (меньше 3 шт.): {lowStockCount}");
-
-shield.Sell(4);
-Console.WriteLine($"Продано 4 щита через переменную shield. Остаток в списке warehouse.Products: {warehouse.Products[0].StockQuantity} шт.");
+Console.WriteLine($"Товаров с критическим остатком (< 3 шт.): {warehouse.CountLowStock(3)}");
+Console.WriteLine($"Удалён «охотничий лук»: {warehouse.RemoveProduct("охотничий лук")}");
+Console.WriteLine($"Позиций на складе после удаления: {warehouse.ProductCount}");
